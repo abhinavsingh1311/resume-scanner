@@ -4,7 +4,6 @@ import Link from 'next/link';
 import handleDownload from '../../components/document';
 
 export default function ResumePage() {
-    const [isHovered, setIsHovered] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [resumeText, setResumeText] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
