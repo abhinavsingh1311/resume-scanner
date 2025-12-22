@@ -8,10 +8,15 @@ export default function ResumePage() {
     async function handleSubmit(e) {
         e.preventDefault();
         try {
-            console.log(selectedFile);
+            //console.log(selectedFile);
+            const form = new FormData();
+            form.append('resume', selectedFile);
+            const response = await fetch('/api/upload', { method: 'POST', body: form });
+            const data = response.json();
+            console.log('response:', data);
         }
-        catch {
-            throw new Error("error submitting");
+        catch (err) {
+            throw new Error("error submitting", err);
         }
 
     }
