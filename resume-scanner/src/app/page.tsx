@@ -24,7 +24,7 @@ export default function Home() {
           </div>
 
           <div className="w-full flex justify-center hidden md: inline lg:inline">
-            <p className="text-center p-2 tracking-wide text-brown-100 text-sm font-light">Yes, that&pos;s a donut in the background :p </p>
+            <p className="text-center p-2 tracking-wide text-brown-100 text-sm font-light">Yes, that is a donut in the background :p </p>
           </div>
         </main>
 
