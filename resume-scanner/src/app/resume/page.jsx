@@ -7,7 +7,8 @@ export default function ResumePage() {
     const [resumeText, setResumeText] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [jobDescription, setJobDescription] = useState(" ");
-
+    const [tailoredResume, setTailoredResume] = useState(null);
+    const [isGenerating, setIsGenerating] = useState(null);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -45,6 +46,43 @@ export default function ResumePage() {
         }
         catch (err) {
             console.log('error uploading file:', err)
+        }
+    }
+    async function HandleGenerate(e) {
+        e.preventDefault();
+        try {
+            if (!resumeText || !jobDescription) {
+                console.error('Missing resume text or job description');
+                return;
+            }
+
+            setIsGenerating(true);
+
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    resumeData: resumeText,
+                    jobDescription: jobDescription
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                setTailoredResume(data.tailoredResume);
+                console.log('Tailored resume generated successfully');
+            } else {
+                console.error('Error generating resume:', data.error);
+            }
+        }
+        catch (err) {
+            console.error('Error generating resume:', err);
+        }
+        finally {
+            setIsGenerating(false);
         }
     }
 
@@ -93,6 +131,36 @@ export default function ResumePage() {
                     <div>
                         <h2>Extracted Resume</h2>
                         <pre className='whitespace-pre-wrap'>{resumeText}</pre>
+                    </div>
+                </div>
+            )}
+
+            {!isLoading && resumeText && jobDescription && (
+                <div className='p-4'>
+                    <button
+                        disabled={!jobDescription || !resumeText || isGenerating}
+                        type="button"
+                        className={isHovered ? "btn-primary" : "btn-secondary"}
+                        onMouseEnter={() => setIsHovered(true)}
+                        onMouseLeave={() => setIsHovered(false)}
+                        onClick={HandleGenerate}
+                    >
+                        {isGenerating ? 'Generating...' : 'Generate tailored resume'}
+                    </button>
+                </div>
+            )}
+
+            {isGenerating && (
+                <div className='p-4'>
+                    <p>Generating your tailored resume with AI... This may take a moment.</p>
+                </div>
+            )}
+
+            {!isGenerating && tailoredResume && (
+                <div className='container mt-3 p-6'>
+                    <div>
+                        <h2>Your Tailored Resume</h2>
+                        <pre className='whitespace-pre-wrap'>{tailoredResume}</pre>
                     </div>
                 </div>
             )}
