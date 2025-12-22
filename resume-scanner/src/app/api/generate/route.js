@@ -15,19 +15,43 @@ export async function POST(request) {
                 { status: 400 })
         }
 
+        const prompt = `You are an expert resume writer and ATS optimization specialist.
+                        ## INPUT
+                        **Current Resume:**
+                        ${resumeData}
+
+                        **Target Job Description:**
+                        ${jobDescription}
+
+                        ## TASK
+                        Rewrite the resume to align with the job description while maintaining truthfulness.
+
+                        ## REQUIREMENTS
+                        - ATS-friendly format (simple headers, no tables/columns)
+                        - Quantify achievements where possible (e.g., "Reduced load time by 40%")
+                        - Match keywords from job description naturally
+                        - Keep to one page
+                        - Use clear section headers: Summary, Experience, Skills, Education etc.
+
+                        ## OUTPUT FORMAT
+                        First, output the complete tailored resume in plain text.
+                        
+                        ## OUTPUT INSTRUCTIONS
+                        Return ONLY the resume text. No introductions like "Here is your resume". No explanations. Start directly with the candidate's name and end after the last section.
+
+                        After the resume, add exactly this separator: |||TIPS|||
+                        Then, provide 5 brief bullet points on how to strengthen the resume further.`;
+
         const message = await client.messages.create({
             max_tokens: 4096,
             messages: [{
-                role: 'user', content: `Hello Claude, Act as if your an expert on resume analysis and an expert HR Manager, I will provide you with my resume and the job desription
-        of the job i am applying for, I want you to review my resume and then compare it against the job description and provide me with an updated and tailored 
-        resume. Remmeber to only output doc file, use an ATS friendly format and real metrics, for eg. improved performance by x% that led to customer retention by y%.
-        Ensure to keep it under one page if the experience is less than 10 years and use professional fonts only. At the end , I want you to also provide me with 5 bullet points , that 
-        are clearly structed and defined (keep them short) . These bullet points should provide me with some advice and takes on how I can improve my resume in general.
-        So here is my resume: ${resumeData} and here is the job description: ${jobDescription}`
+                role: 'user', content: prompt
             }],
             model: 'claude-3-opus-latest',
         });
-        return Response.json({ success: true, tailoredResume: message.content[0].text });
+
+        const [resume, tips] = message.content[0].text.split('|||TIPS|||');
+        return Response.json({ success: true, tailoredResume: resume.trim(), tips: tips?.trim() });
     }
     catch (error) {
         console.log("Error getting data :", error);

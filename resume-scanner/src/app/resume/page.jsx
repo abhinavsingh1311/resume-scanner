@@ -1,5 +1,7 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
+import handleDownload from '../../components/document';
 
 export default function ResumePage() {
     const [isHovered, setIsHovered] = useState(false);
@@ -9,6 +11,8 @@ export default function ResumePage() {
     const [jobDescription, setJobDescription] = useState(" ");
     const [tailoredResume, setTailoredResume] = useState(null);
     const [isGenerating, setIsGenerating] = useState(null);
+    const [tips, setTips] = useState(null);
+
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -48,7 +52,8 @@ export default function ResumePage() {
             console.log('error uploading file:', err)
         }
     }
-    async function HandleGenerate(e) {
+
+    async function handleGenerate(e) {
         e.preventDefault();
         try {
             if (!resumeText || !jobDescription) {
@@ -73,7 +78,8 @@ export default function ResumePage() {
 
             if (data.success) {
                 setTailoredResume(data.tailoredResume);
-                console.log('Tailored resume generated successfully');
+                setTips(data.tips);
+                console.log('Tailored resume & tips generated successfully');
             } else {
                 console.error('Error generating resume:', data.error);
             }
@@ -88,83 +94,107 @@ export default function ResumePage() {
 
     return (
         <div className='container m-4'>
-            <main>
-                <h1>Upload your resume</h1>
+            {tailoredResume && tips ? (
                 <div>
-                    <form onSubmit={handleSubmit} method="post" encType="multipart/form-data">
-                        <div>
-                            <label htmlFor="file"> Choose a file to Upload</label>
-                            <input onChange={handleFileChanges} type="file" id="file" name="file" accept=".doc, .docx, .pdf" />
+                    <div>
+                        <h2>Tailored resume here: </h2>
+                        <pre className='whitespace-pre-wrap'>{tailoredResume}</pre>
+                        <button
+                            className='btn-secondary'
+                            onClick={() => {
+                                const baseName = selectedFile.name.replace(/\.(pdf|docx)$/i, '');
+                                handleDownload(tailoredResume, `${baseName}.docx`);
+                            }}>
+                            Download as docx file
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setTailoredResume(null);
+                                setResumeText(null);
+                                setJobDescription("");
+                                setSelectedFile(null);
+                            }}
+                            className='btn-secondary'
+                        >New resume
+                        </button>
+                    </div>
+                    <div>
+                        <h2>Tips</h2>
+                        <pre className='whitespace-pre-wrap'>{tips}</pre>
+                    </div>
+                </div>) : (
+                <main>
+                    <div className='flex grid-cols-2 justify-between mb-2'>
+                        <h1>Upload your resume</h1>
+                        <Link href="/">Go to home page</Link>
+                    </div>
+                    <div>
+                        <form onSubmit={handleSubmit} method="post" encType="multipart/form-data">
+                            <div className="grid-cols-2">
+                                <label htmlFor="file"> Choose a file to Upload</label>
+                                <input onChange={handleFileChanges} type="file" id="file" name="file" accept=".doc, .docx, .pdf" />
+                            </div>
+                            <div>
+                                <label htmlFor="jobDescription">Paste the job description</label>
+                                <textarea
+                                    name="jobDescription"
+                                    id="jobDescription"
+                                    value={jobDescription}
+                                    onChange={(e) => setJobDescription(e.target.value)}
+                                    rows={8}
+                                    placeholder='Paste/Write the job description here (Do it , dont be lazy!)'
+                                />
+                            </div>
+                            <div>
+                                <button
+                                    disabled={!selectedFile || isLoading || !jobDescription}
+                                    type="submit"
+                                    className={isHovered ? "btn-primary" : "btn-secondary"}
+                                    onMouseEnter={() => setIsHovered(true)}
+                                    onMouseLeave={() => setIsHovered(false)}
+                                >
+                                    {isLoading ? 'Processing...' : 'Submit'}
+                                </button>
+                            </div>
+                        </form>
+                        {isLoading && (
+                            <div>
+                                <p>Processing your resume, this may take a moment...</p>
+                            </div>
+                        )}
+                    </div>
+                    {!isLoading && resumeText && (
+                        <div className='container mt-3 p-6'>
+                            <div>
+                                <h2>Extracted Resume</h2>
+                                <pre className='whitespace-pre-wrap'>{resumeText}</pre>
+                            </div>
                         </div>
-                        <div>
-                            <label htmlFor="jobDescription">Paste the job description</label>
-                            <textarea
-                                name="jobDescription"
-                                id="jobDescription"
-                                value={jobDescription}
-                                onChange={(e) => setJobDescription(e.target.value)}
-                                rows={8}
-                                placeholder='Paste/Write the job description here (Do it , dont be lazy!)'
-                            />
-                        </div>
-                        <div>
+                    )}
+
+                    {!isLoading && resumeText && jobDescription && (
+                        <div className='p-4'>
                             <button
-                                disabled={!selectedFile || isLoading || !jobDescription}
-                                type="submit"
+                                disabled={!jobDescription || !resumeText || isGenerating}
+                                type="button"
                                 className={isHovered ? "btn-primary" : "btn-secondary"}
                                 onMouseEnter={() => setIsHovered(true)}
                                 onMouseLeave={() => setIsHovered(false)}
+                                onClick={handleGenerate}
                             >
-                                {isLoading ? 'Processing...' : 'Submit'}
+                                {isGenerating ? 'Generating...' : 'Generate tailored resume'}
                             </button>
                         </div>
-                    </form>
-                    {isLoading && (
-                        <div>
-                            <p>Processing your resume, this may take a moment...</p>
+                    )}
+
+                    {isGenerating && (
+                        <div className='p-4'>
+                            <p>Generating your tailored resume with AI... This may take a moment.</p>
                         </div>
                     )}
-                </div>
-            </main>
-            {!isLoading && resumeText && (
-                <div className='container mt-3 p-6'>
-                    <div>
-                        <h2>Extracted Resume</h2>
-                        <pre className='whitespace-pre-wrap'>{resumeText}</pre>
-                    </div>
-                </div>
+                </main>
             )}
-
-            {!isLoading && resumeText && jobDescription && (
-                <div className='p-4'>
-                    <button
-                        disabled={!jobDescription || !resumeText || isGenerating}
-                        type="button"
-                        className={isHovered ? "btn-primary" : "btn-secondary"}
-                        onMouseEnter={() => setIsHovered(true)}
-                        onMouseLeave={() => setIsHovered(false)}
-                        onClick={HandleGenerate}
-                    >
-                        {isGenerating ? 'Generating...' : 'Generate tailored resume'}
-                    </button>
-                </div>
-            )}
-
-            {isGenerating && (
-                <div className='p-4'>
-                    <p>Generating your tailored resume with AI... This may take a moment.</p>
-                </div>
-            )}
-
-            {!isGenerating && tailoredResume && (
-                <div className='container mt-3 p-6'>
-                    <div>
-                        <h2>Your Tailored Resume</h2>
-                        <pre className='whitespace-pre-wrap'>{tailoredResume}</pre>
-                    </div>
-                </div>
-            )}
-
         </div>
     )
-}
+};
