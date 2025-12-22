@@ -2,8 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 export default function Home() {
   return (
-    <div className="h-screen flex flex-col items-center bg-amber-50 bg-[url(/bg-leaves.jpg)] bg-right bg-cover dark:bg-black">
-      <div className="flex flex-col h-full w-full max-w-3xl bg-stone-300">
+    <div className="h-screen flex flex-col items-center bg-amber-50 bg-[url(/bg-leaves.jpg)] bg-top bg-cover dark:bg-black">
+      <div className="flex flex-col h-full w-full max-w-3xl bg-stone-200">
         <main className="flex-1 flex flex-col items-center justify-center p-4 lg:px-16">
           <div className="flex flex-col items-center">
             <Image src="/breadSlice.svg" alt="Logo" width={200} height={200} priority />
@@ -22,6 +22,10 @@ export default function Home() {
               Upload Resume
             </Link>
           </div>
+
+          <div className="w-full flex justify-center hidden md: inline lg:inline">
+            <p className="text-center p-2 tracking-wide text-brown-100 text-sm font-light">Yes, that's a donut in the background :p </p>
+          </div>
         </main>
 
         <footer className="flex flex-col items-center w-full bg-brown rounded-t-md p-3">
@@ -31,6 +35,7 @@ export default function Home() {
           <p className="text-orange-300">
             Uses <Link href="https://console.anthropic.com" target="_blank" className="hover:text-[orange]">Claude API</Link>
           </p>
+
         </footer>
       </div>
     </div>
