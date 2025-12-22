@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
@@ -9,7 +8,7 @@ export default function Home() {
           <div>
             <h1>Resume scanner</h1>
             <p>Use this boring website to scan and analyze your resume <br />
-              Uses Claude's api and some fancy prompts to compare your resume against the job and provides you a new resume that is ATS friendly and aligned to the job.
+              Uses Claude&apos;s api and some fancy prompts to compare your resume against the job and provides you a new resume that is ATS friendly and aligned to the job.
             </p>
           </div>
           <div className="">

@@ -6,6 +6,7 @@ export default function ResumePage() {
     const [selectedFile, setSelectedFile] = useState(null);
     const [resumeText, setResumeText] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [jobDescription, setJobDescription] = useState(" ");
 
 
     async function handleSubmit(e) {
@@ -14,6 +15,7 @@ export default function ResumePage() {
             //console.log(selectedFile);
             const form = new FormData();
             form.append('resume', selectedFile);
+            form.append('jobDescription', jobDescription);
 
             //set loading true
             setIsLoading(true);
@@ -22,7 +24,8 @@ export default function ResumePage() {
 
             setResumeText(data.text);
             console.log('response:', data);
-            console.log(data.text);
+            console.log('Resume text:', data.text);
+            console.log('Job description:', jobDescription);
         }
         catch (err) {
             throw new Error("error submitting", err);
@@ -56,8 +59,19 @@ export default function ResumePage() {
                             <input onChange={handleFileChanges} type="file" id="file" name="file" accept=".doc, .docx, .pdf" />
                         </div>
                         <div>
+                            <label htmlFor="jobDescription">Paste the job description</label>
+                            <textarea
+                                name="jobDescription"
+                                id="jobDescription"
+                                value={jobDescription}
+                                onChange={(e) => setJobDescription(e.target.value)}
+                                rows={8}
+                                placeholder='Paste/Write the job description here (Do it , dont be lazy!)'
+                            />
+                        </div>
+                        <div>
                             <button
-                                disabled={!selectedFile || isLoading}
+                                disabled={!selectedFile || isLoading || !jobDescription}
                                 type="submit"
                                 className={isHovered ? "btn-primary" : "btn-secondary"}
                                 onMouseEnter={() => setIsHovered(true)}
