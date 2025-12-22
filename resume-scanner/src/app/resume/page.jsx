@@ -100,7 +100,7 @@ export default function ResumePage() {
                         <h2>Tailored resume here: </h2>
                         <pre className='whitespace-pre-wrap'>{tailoredResume}</pre>
                         <button
-                            className='btn-secondary'
+                            className='btn-secondary hover:bg-'
                             onClick={() => {
                                 const baseName = selectedFile.name.replace(/\.(pdf|docx)$/i, '');
                                 handleDownload(tailoredResume, `${baseName}.docx`);
