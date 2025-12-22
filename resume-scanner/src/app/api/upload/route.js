@@ -1,4 +1,4 @@
-const { extractText } = require('unpdf');
+const { extractText, getDocumentProxy } = require('unpdf');
 
 export async function POST(request) {
 
@@ -7,8 +7,9 @@ export async function POST(request) {
         const parsedFile = formData.get('resume')
         console.log(parsedFile.name);
         const buffer = await parsedFile.arrayBuffer();
-        const { parser } = await extractText(buffer);
-        return Response.json({ succcess: true, fileName: parsedFile.name, parser });
+        const pdf = await getDocumentProxy(new Uint8Array(buffer));
+        const { text } = await extractText(pdf, { mergePages: true });
+        return Response.json({ success: true, fileName: parsedFile.name, text });
 
     }
     catch (err) {
