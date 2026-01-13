@@ -1,26 +1,30 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { readFile } from 'fs/promises';
-import path from 'path';
-import mammoth from 'mammoth';
+import Anthropic from "@anthropic-ai/sdk";
+import { readFile } from "fs/promises";
+import path from "path";
+import mammoth from "mammoth";
 
 const client = new Anthropic({
-    apiKey: process.env['ANTHROPIC_API_KEY'],
-
+  apiKey: process.env["ANTHROPIC_API_KEY"],
 });
 
-
 export async function POST(request) {
-    try {
-        const { resumeData, jobDescription } = await request.json();
-        if (!resumeData || !jobDescription) {
-            return Response.json({ error: 'Missing data !' },
-                { status: 400 })
-        }
+  try {
+    const { resumeData, jobDescription } = await request.json();
+    if (!resumeData || !jobDescription) {
+      return Response.json({ error: "Missing data !" }, { status: 400 });
+    }
 
-        const templatePath = path.join(process.cwd(), 'src', 'template', 'resume-template.docx');
-        const templateBuffer = await readFile(templatePath);
-        const { value: templateText } = await mammoth.extractRawText({ buffer: templateBuffer });
-        const prompt = `You are an expert resume writer and ATS optimization specialist.
+    const templatePath = path.join(
+      process.cwd(),
+      "src",
+      "template",
+      "resume-template.docx"
+    );
+    const templateBuffer = await readFile(templatePath);
+    const { value: templateText } = await mammoth.extractRawText({
+      buffer: templateBuffer,
+    });
+    const prompt = `You are an expert resume writer and ATS optimization specialist.
                          ## INPUT
                         **Current Resume:**
                         ${resumeData}
@@ -81,19 +85,28 @@ export async function POST(request) {
                         After the resume, add exactly this separator: |||TIPS|||
                         Then list 5 brief improvement tips.`;
 
-        const message = await client.messages.create({
-            max_tokens: 4096,
-            messages: [{
-                role: 'user', content: prompt
-            }],
-            model: 'claude-3-opus-latest',
-        });
+    const message = await client.messages.create({
+      max_tokens: 4096,
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      model: "claude-opus-4-5",
+    });
 
-        const [resume, tips] = message.content[0].text.split('|||TIPS|||');
-        return Response.json({ success: true, tailoredResume: resume.trim(), tips: tips?.trim() });
-    }
-    catch (error) {
-        console.log("Error getting data :", error);
-        return Response.json({ success: false, error: 'Generation failed' }, { status: 500 });
-    }
+    const [resume, tips] = message.content[0].text.split("|||TIPS|||");
+    return Response.json({
+      success: true,
+      tailoredResume: resume.trim(),
+      tips: tips?.trim(),
+    });
+  } catch (error) {
+    console.log("Error getting data :", error);
+    return Response.json(
+      { success: false, error: `${error}` },
+      { status: 500 }
+    );
+  }
 }
